@@ -18,4 +18,7 @@ app.get("/items", (req, res) => {
 });
 
 const PORT = 3000;
+app.get("/", (req, res) => {
+  res.send("Міні онлайн-магазин аксесуарів — сервер працює 🎉");
+});
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
