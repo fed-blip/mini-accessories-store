@@ -1,0 +1,125 @@
+openapi: 3.0.0
+info:
+  title: Mini Accessories Store API
+  version: 1.0.0
+
+paths:
+  /products:
+    get:
+      summary: Get all products
+      responses:
+        '200':
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductResponse'
+
+    post:
+      summary: Create product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductCreateRequest'
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Validation error
+
+  /products/{id}:
+    get:
+      summary: Get product by id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Product
+        '404':
+          description: Not found
+
+    put:
+      summary: Update product
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductUpdateRequest'
+      responses:
+        '200':
+          description: Updated
+        '404':
+          description: Not found
+
+    delete:
+      summary: Delete product
+      parameters:
+        - in: path
+          name: id
+          required: true
+      responses:
+        '204':
+          description: Deleted
+        '404':
+          description: Not found
+
+components:
+  schemas:
+    ProductCreateRequest:
+      type: object
+      required: [name, price]
+      properties:
+        name:
+          type: string
+        price:
+          type: number
+
+    ProductUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        price:
+          type: number
+
+    ProductResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        price:
+          type: number
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
