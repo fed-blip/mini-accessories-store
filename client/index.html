@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>Магазин аксесуарів</title>
+</head>
+<body>
+  <h1>Магазин аксесуарів</h1>
+
+  <button id="load">Load items</button>
+  <ul id="list"></ul>
+
+<script>
+document.getElementById("load").addEventListener("click", async () => {
+  const res = await fetch("http://localhost:3000/items");
+  const items = await res.json();
+
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  items.forEach(i => {
+    const li = document.createElement("li");
+    li.textContent = `${i.id}. ${i.name}`;
+    list.appendChild(li);
+  });
+});
+</script>
+</body>
+</html>
