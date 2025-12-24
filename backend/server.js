@@ -6,7 +6,14 @@ const path = require("path");
 const { randomUUID } = require("crypto");
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: "*",
+  allowedHeaders: [
+    "Content-Type",
+    "Idempotency-Key",
+    "X-Request-Id"
+  ]
+}));
 app.use(express.json());
 
 // ================== X-Request-Id ==================
