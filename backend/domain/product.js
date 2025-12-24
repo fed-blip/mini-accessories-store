@@ -1,19 +1,29 @@
+const { v4: uuidv4 } = require('uuid');
+
 class Product {
   constructor({ id, name, price }) {
-    if (!name) throw new Error("NAME_REQUIRED");
-    if (price == null || price < 0) throw new Error("INVALID_PRICE");
-
-    this.id = id;
+    this.id = id || uuidv4();
     this.name = name;
     this.price = price;
+
+    this.validate();
   }
 
-  update({ name, price }) {
-    if (name) this.name = name;
-    if (price != null) {
-      if (price < 0) throw new Error("INVALID_PRICE");
-      this.price = price;
+  validate() {
+    if (!this.name || typeof this.name !== 'string') {
+      throw new Error('Product name is required');
     }
+
+    if (this.price == null || typeof this.price !== 'number') {
+      throw new Error('Product price must be a number');
+    }
+  }
+
+  update(data) {
+    if (data.name !== undefined) this.name = data.name;
+    if (data.price !== undefined) this.price = data.price;
+
+    this.validate();
   }
 }
 

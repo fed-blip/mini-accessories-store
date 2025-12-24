@@ -1,41 +1,67 @@
 const Product = require("../domain/product");
-const { randomUUID } = require("crypto");
 
 let products = [];
 
-class ProductService {
-  getAll() {
-    return products;
-  }
 
-  getById(id) {
-    return products.find(p => p.id === id) || null;
-  }
-
-  create(data) {
-    const product = new Product({
-      id: randomUUID(),
-      name: data.name,
-      price: data.price
-    });
-
-    products.push(product);
-    return product;
-  }
-
-  update(id, data) {
-    const product = this.getById(id);
-    if (!product) return null;
-
-    product.update(data);
-    return product;
-  }
-
-  delete(id) {
-    const before = products.length;
-    products = products.filter(p => p.id !== id);
-    return products.length !== before;
-  }
+function getAll() {
+  return products;
 }
 
-module.exports = new ProductService();
+function getById(id) {
+  const product = products.find(p => p.id === id);
+  if (!product) {
+    const err = new Error("Product not found");
+    err.type = "NOT_FOUND";
+    throw err;
+  }
+  return product;
+}
+
+
+function create(data) {
+  if (!data) {
+    const err = new Error("Request body is required");
+    err.type = "VALIDATION";
+    throw err;
+  }
+
+  const { name, price } = data;
+
+  if (!name || price === undefined) {
+    const err = new Error("Name and price are required");
+    err.type = "VALIDATION";
+    throw err;
+  }
+
+  const product = new Product({ name, price });
+  products.push(product);
+  return product;
+}
+
+
+function update(id, data) {
+  if (!data) {
+    const err = new Error("Request body is required");
+    err.type = "VALIDATION";
+    throw err;
+  }
+
+  const product = getById(id);
+  product.update(data);
+  return product;
+}
+
+
+function remove(id) {
+  getById(id); 
+  products = products.filter(p => p.id !== id);
+  return;
+}
+
+module.exports = {
+  getAll,
+  getById,
+  create,
+  update,
+  remove
+};

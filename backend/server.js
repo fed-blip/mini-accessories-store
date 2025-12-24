@@ -6,6 +6,8 @@ const path = require("path");
 
 const app = express();
 app.use(cors());
+app.use(express.json());
+
 
 const initSql = fs.readFileSync(path.join(__dirname, "items.sql"), "utf8");
 db.exec(initSql);
@@ -17,8 +19,19 @@ app.get("/items", (req, res) => {
   });
 });
 
+
+app.get("/health", (req, res) => {
+  res.json({ status: "ok" });
+});
+
+
+const productsRouter = require("./api/products");
+app.use("/products", productsRouter);
+
+
 const PORT = 3000;
 app.get("/", (req, res) => {
   res.send("Міні онлайн-магазин аксесуарів — сервер працює 🎉");
 });
+
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
