@@ -9,13 +9,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ---------------- DB INIT ----------------
-const initSql = fs.readFileSync(path.join(__dirname, "items.sql"), "utf8");
-db.exec(initSql);
-
-const now = () => Date.now();
-
-// ---------------- X‑Request‑Id ----------------
+// ================== X-Request-Id ==================
+// робимо щоб кожен запит мав свій унікальний id
 app.use((req, res, next) => {
   const rid = req.get("X-Request-Id") || randomUUID();
   req.rid = rid;
@@ -23,7 +18,14 @@ app.use((req, res, next) => {
   next();
 });
 
-// ---------------- Rate limit + Retry‑After ----------------
+// ================== База ==================
+const initSql = fs.readFileSync(path.join(__dirname, "items.sql"), "utf8");
+db.exec(initSql);
+
+const now = () => Date.now();
+
+// ================== Rate limit + Retry‑After ==================
+// примітивний ліміт запитів за 10 секунд
 const rate = new Map();
 const WINDOW_MS = 10_000;
 const MAX_REQ = 8;
@@ -53,16 +55,17 @@ app.use((req, res, next) => {
   next();
 });
 
-// ---------------- Fault injection ----------------
+// ================== Fault injection ==================
+// інколи сервер спеціально лагає або падає
 app.use(async (req, res, next) => {
   const r = Math.random();
 
-  // іноді затримка
+  // затримка відповіді
   if (r < 0.15) {
     await new Promise(r => setTimeout(r, 1200 + Math.random() * 800));
   }
 
-  // іноді 503 або 500
+  // 503 або 500
   if (r > 0.8) {
     const err = Math.random() < 0.5 ? "unavailable" : "unexpected";
     const code = err === "unavailable" ? 503 : 500;
@@ -72,8 +75,8 @@ app.use(async (req, res, next) => {
   next();
 });
 
-// ---------------- ІДЕМПОТЕНТНИЙ POST /orders ----------------
-const idemStore = new Map(); // Idempotency-Key -> order
+// ================== Ідемпотентний POST ==================
+const idemStore = new Map();
 
 app.post("/orders", (req, res) => {
   const key = req.get("Idempotency-Key");
@@ -85,7 +88,7 @@ app.post("/orders", (req, res) => {
     });
   }
 
-  // якщо вже був такий запит — вертаємо той самий результат
+  // якщо вже створювали з цим ключем → повертаємо старий результат
   if (idemStore.has(key)) {
     return res
       .status(201)
@@ -102,13 +105,14 @@ app.post("/orders", (req, res) => {
   return res.status(201).json({ ...order, requestId: req.rid });
 });
 
-// ---------------- API що вже було ----------------
+// ================== API ==================
 app.get("/items", (req, res) => {
   db.all("SELECT * FROM items", [], (err, rows) => {
     if (err)
       return res
         .status(500)
         .json({ error: "db_error", requestId: req.rid });
+
     res.json(rows);
   });
 });
@@ -120,13 +124,26 @@ app.get("/health", (_req, res) => {
 const productsRouter = require("./api/products");
 app.use("/products", productsRouter);
 
-// ---------------- ROOT ----------------
-const PORT = 3000;
-
+// ================== ROOT ==================
 app.get("/", (req, res) => {
   res.send("Міні онлайн-магазин аксесуарів — сервер працює 🎉");
 });
 
+// ================== Єдиний формат помилок ==================
+// (обов'язково в самому кінці)
+app.use((err, req, res, next) => {
+  console.error("SERVER ERROR:", err);
+
+  res.status(err.status || 500).json({
+    error: err.message || "unexpected_error",
+    code: err.code ?? null,
+    details: err.details ?? null,
+    requestId: req?.rid ?? null
+  });
+});
+
+// ================== START ==================
+const PORT = 3000;
 app.listen(PORT, () =>
   console.log(`Server running on port ${PORT}`)
 );
