@@ -23,3 +23,5 @@ node server.js
 
 ## Результат
 Натискаємо "Load items" → бачимо список товарів з БД.
+
+![CI](https://github.com/fed-blip/mini-accessories-store/actions/workflows/ci.yml/badge.svg)
