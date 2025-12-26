@@ -1,0 +1,11 @@
+{
+  "name": "mini-accessories-store",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "npm run dev",
+    "dev": "concurrently \"npm --prefix backend start\" \"npx live-server ./frontend/index.html --port=5501\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

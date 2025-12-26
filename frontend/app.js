@@ -1,4 +1,5 @@
-const API = "http://localhost:3000/orders";
+const API_BASE = "https://cautious-chainsaw-xrvr6r77752pvx4-3000.app.github.dev";
+const API = `${API_BASE}/api/orders`;
 
 let failCount = 0;
 const FAIL_LIMIT = 3;
@@ -40,7 +41,6 @@ async function fetchWithResilience(url, payload) {
         signal: controller.signal,
       });
 
-      // 429 → чекаємо Retry‑After
       if (res.status === 429) {
         const ra = Number(res.headers.get("Retry-After") || 1) * 1000;
         log("429 → чекаємо " + ra + "ms");
@@ -48,7 +48,6 @@ async function fetchWithResilience(url, payload) {
         continue;
       }
 
-      // 5xx → ретраї
       if ([500, 502, 503, 504].includes(res.status) && retries > 0) {
         const delay = backoff(300, attempt++);
         log("5xx → ретраї через " + delay + "ms");
@@ -73,7 +72,7 @@ async function createOrder() {
   try {
     const payload = { title: "watch" };
 
-    const res = await fetchWithResilience(API, payload);
+    const res = await fetchWithResilience(`${API_BASE}/orders`, payload);
     const data = await res.json();
 
     if (!res.ok) {

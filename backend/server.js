@@ -133,7 +133,7 @@ app.use("/products", productsRouter);
 
 // ================== ROOT ==================
 app.get("/", (req, res) => {
-  res.send("Міні онлайн-магазин аксесуарів — сервер працює 🎉");
+  res.send("Mini Accessories API works");
 });
 
 // ================== Єдиний формат помилок ==================
@@ -151,6 +151,6 @@ app.use((err, req, res, next) => {
 
 // ================== START ==================
 const PORT = 3000;
-app.listen(PORT, () =>
-  console.log(`Server running on port ${PORT}`)
+app.listen(3000, "0.0.0.0", () =>
+  console.log("Server running on port 3000")
 );
