@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   api:
-    image: mini-store-api:1.0.0
+    build: ./backend
     container_name: mini-api
     ports:
       - "3000:3000"
@@ -11,6 +11,6 @@ services:
     build: ./frontend
     container_name: mini-frontend
     ports:
-      - "5500:5500"
+      - "8080:8080"
     depends_on:
       - api
